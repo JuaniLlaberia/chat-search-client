@@ -1,36 +1,16 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Web Search Agent Frontend
 
-## Getting Started
+Related repositories
 
-First, run the development server:
+Backend (Agent server): [Agent server backend](https://github.com/JuaniLlaberia/chat-search-server)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Project overview
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This repository contains the frontend for interacting with the web search agent. It provides a clean, modern and simple chat interface where users can ask questions, view synthesized answers, and explore citations.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Goals:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* Minimal, responsive chat interface.
+* Show answers **with citations** in a transparent way.
+* Quick access to follow-up queries.
+* Extensible design (works with different backends or LangGraph agents).
