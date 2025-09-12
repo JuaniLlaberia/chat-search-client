@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Globe, MicIcon, Paperclip } from 'lucide-react';
+import { ArrowRight, Globe, MicIcon, MicOff, Paperclip } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { type KeyboardEvent, useState } from 'react';
 
@@ -9,6 +9,7 @@ import SearchSuggestions from './search-suggestions';
 import { Button } from '../ui/button';
 import { useChat } from '@/contexts/chat-context';
 import { useChatStream } from '@/hooks/use-chat-stream';
+import { useSpeechAPI } from '@/hooks/use-speech-api';
 
 const InputBar = ({
   includeSuggestions = false,
@@ -19,6 +20,9 @@ const InputBar = ({
   const router = useRouter();
 
   const [localMessage, setLocalMessage] = useState<string>('');
+
+  const { hasRecognitionSupport, startListening, stopListening, isListening } =
+    useSpeechAPI({ onTextChange: setLocalMessage });
 
   const {
     checkpointId,
@@ -127,12 +131,28 @@ const InputBar = ({
                 size='icon'
                 variant='ghost'
                 className='group cursor-pointer'
+                onClick={e => {
+                  e.preventDefault();
+                  return isListening ? stopListening() : startListening();
+                }}
+                disabled={!hasRecognitionSupport}
               >
-                <span className='sr-only'>Set speaker mode on/off</span>
-                <MicIcon
-                  className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
-                  strokeWidth={2.5}
-                />
+                <span className='sr-only'>
+                  {hasRecognitionSupport
+                    ? 'Set speaker mode on/off'
+                    : 'You browser does not have support'}
+                </span>
+                {isListening ? (
+                  <MicOff
+                    className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                    strokeWidth={2.5}
+                  />
+                ) : (
+                  <MicIcon
+                    className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                    strokeWidth={2.5}
+                  />
+                )}
               </Button>
             </Hint>
             <Button
