@@ -1,73 +1,89 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
-import { KeyboardEvent } from 'react';
-import { Button } from '../ui/button';
+import { ArrowRight, Globe, MicIcon, Paperclip } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { type KeyboardEvent, useState } from 'react';
 
-interface InputBarProps {
-  currentMessage: string;
-  setCurrentMessage: (message: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-}
+import Hint from '../ui/hint';
+import SearchSuggestions from './search-suggestions';
+import { Button } from '../ui/button';
+import { useChat } from '@/contexts/chat-context';
+import { useChatStream } from '@/hooks/use-chat-stream';
 
 const InputBar = ({
-  currentMessage,
-  setCurrentMessage,
-  onSubmit,
-}: InputBarProps) => {
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCurrentMessage(e.target.value);
+  includeSuggestions = false,
+}: {
+  includeSuggestions: boolean;
+}) => {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const [localMessage, setLocalMessage] = useState<string>('');
+
+  const {
+    checkpointId,
+    setCheckpointId,
+
+    createMessage,
+    updateMessage,
+    setMessageError,
+  } = useChat();
+
+  const { streamChat } = useChatStream({
+    onContent: content => {
+      updateMessage({ content, isLoading: false });
+    },
+    onSearchUpdate: searchInfo => {
+      updateMessage({ ...searchInfo });
+    },
+    onCheckpoint: newCheckpointId => {
+      setCheckpointId(newCheckpointId);
+    },
+    onError: errorMessage => {
+      setMessageError(errorMessage);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!localMessage.trim()) return;
+
+    if (pathname !== '/search') router.push('/search');
+
+    createMessage(localMessage);
+    setLocalMessage('');
+
+    await streamChat(localMessage, checkpointId);
   };
 
   const handleEnterPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-
       if (e.shiftKey) {
-        setCurrentMessage(currentMessage + '\n');
-      } else if (currentMessage.trim() !== '') {
-        onSubmit(e);
+        setLocalMessage(prev => prev + '\n');
+      } else if (localMessage.trim() !== '') {
+        handleSubmit(e);
       }
     }
   };
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className='w-full p-5 border border-border bg-muted/25 mb-5 md:mb-0 rounded-xl mt-3'
-    >
-      <div className='flex gap-2 relative'>
-        <textarea
-          autoFocus
-          placeholder='What do you have in mind?'
-          className='outline-none bg-transparent border-transparent w-full pr-10 h-16 max-h-36 resize-none placeholder:text-muted-foreground'
-          value={currentMessage}
-          onChange={handleChange}
-          onKeyDown={handleEnterPress}
-        />
-        <div
-          className={`
-          absolute right-0 transition-all duration-300
-          ${
-            currentMessage
-              ? 'translate-y-0 opacity-100'
-              : 'translate-y-full opacity-0'
-          }
-        `}
-        >
-          <Button
-            size='icon'
-            variant='special'
-            type='submit'
-            disabled={!currentMessage}
-            className='cursor-pointer'
-          >
-            <ArrowRight className='size-6' strokeWidth={2.5} />
-          </Button>
+    <>
+      <form
+        onSubmit={handleSubmit}
+        className='w-full p-5 border border-border bg-muted/25 mb-5 md:mb-0 rounded-xl mt-3 z-[100]'
+      >
+        <div className='flex gap-2 relative'>
+          <textarea
+            autoFocus
+            placeholder='What do you have in mind?'
+            className='outline-none bg-transparent border-transparent w-full pr-10 h-16 resize-none placeholder:text-muted-foreground'
+            value={localMessage}
+            onChange={e => setLocalMessage(e.target.value)}
+            onKeyDown={handleEnterPress}
+          />
         </div>
-      </div>
-      <div className='flex items-center justify-between'>
-        {currentMessage && (
+        <div className='flex items-center justify-between'>
           <p className='text-xs text-muted-foreground font-light'>
             Use{' '}
             <span className='bg-muted p-1 px-1.5 rounded-md text-primary'>
@@ -79,10 +95,60 @@ const InputBar = ({
             </span>{' '}
             for a new line
           </p>
-        )}
-        <div className='py-2' />
-      </div>
-    </form>
+          <div className='flex gap-1'>
+            <Hint label='Set sources to search'>
+              <Button
+                size='icon'
+                variant='ghost'
+                className='group cursor-pointer'
+              >
+                <span className='sr-only'>Set sources to search</span>
+                <Globe
+                  className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                  strokeWidth={2.5}
+                />
+              </Button>
+            </Hint>
+            <Hint label='Attach file'>
+              <Button
+                size='icon'
+                variant='ghost'
+                className='group cursor-pointer'
+              >
+                <span className='sr-only'>Attach file</span>
+                <Paperclip
+                  className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                  strokeWidth={2.5}
+                />
+              </Button>
+            </Hint>
+            <Hint label='Speaker mode'>
+              <Button
+                size='icon'
+                variant='ghost'
+                className='group cursor-pointer'
+              >
+                <span className='sr-only'>Set speaker mode on/off</span>
+                <MicIcon
+                  className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                  strokeWidth={2.5}
+                />
+              </Button>
+            </Hint>
+            <Button
+              size='icon'
+              variant='special'
+              type='submit'
+              disabled={!localMessage}
+              className='cursor-pointer'
+            >
+              <ArrowRight className='size-6' strokeWidth={2.5} />
+            </Button>
+          </div>
+        </div>
+      </form>
+      {includeSuggestions && <SearchSuggestions setSearch={setLocalMessage} />}
+    </>
   );
 };
 
