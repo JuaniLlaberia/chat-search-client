@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { redirect } from 'next/navigation';
 
-import Message from './message';
+import Message from '@/components/message/message';
 import { useChat } from '@/contexts/chat-context';
 
 const MessageArea = () => {
