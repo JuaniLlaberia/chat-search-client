@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Finder',
+  title: 'Web Search Agent',
   description:
     'Ask about anything you want to know and get and answer instantly.',
 };
