@@ -22,6 +22,7 @@ Back-end service: [Agent server backend](https://github.com/JuaniLlaberia/chat-s
 * Real-time responses connecting with SSe
 * Get access to sources and images
 * Super simple to use
+* Speech to tech functionalities
 * Modular design → easily extendable
 
 ---
