@@ -16,6 +16,7 @@ export class ChatService {
   async streamChat(
     userInput: string,
     checkpointId: string | null,
+    topic: 'general' | 'news' | 'finance' = 'general',
     handlers: StreamHandlers
   ) {
     try {
@@ -24,6 +25,9 @@ export class ChatService {
       )}`;
       if (checkpointId) {
         url += `?checkpoint_id=${encodeURIComponent(checkpointId)}`;
+      }
+      if (topic) {
+        url += `?topic=${encodeURIComponent(topic)}`;
       }
 
       this.eventSource = new EventSource(url);

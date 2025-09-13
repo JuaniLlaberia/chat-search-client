@@ -29,11 +29,15 @@ export const useChatStream = ({
 }: UseChatStreamProps) => {
   const chatServiceRef = useRef<ChatService>(new ChatService());
 
-  const streamChat = async (userInput: string, checkpointId: string | null) => {
+  const streamChat = async (
+    userInput: string,
+    checkpointId: string | null,
+    topic: 'general' | 'news' | 'finance' = 'general'
+  ) => {
     const chatService = chatServiceRef.current;
 
     try {
-      await chatService.streamChat(userInput, checkpointId, {
+      await chatService.streamChat(userInput, checkpointId, topic, {
         onContent: content => {
           onContent(content);
         },

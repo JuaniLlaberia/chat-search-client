@@ -1,15 +1,55 @@
 'use client';
 
-import { ArrowRight, Globe, MicIcon, MicOff, Paperclip } from 'lucide-react';
+import {
+  ArrowRight,
+  Globe,
+  Landmark,
+  LucideIcon,
+  MicIcon,
+  MicOff,
+  Newspaper,
+} from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { type KeyboardEvent, useState } from 'react';
 
 import Hint from '../ui/hint';
 import SearchSuggestions from './search-suggestions';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Button } from '../ui/button';
 import { useChat } from '@/contexts/chat-context';
 import { useChatStream } from '@/hooks/use-chat-stream';
 import { useSpeechAPI } from '@/hooks/use-speech-api';
+import { Switch } from '../ui/switch';
+
+const TOPICS: {
+  title: string;
+  description: string;
+  value: 'general' | 'news' | 'finance';
+  Icon: LucideIcon;
+}[] = [
+  {
+    title: 'Web',
+    description: 'Search the entire internet',
+    value: 'general',
+    Icon: Globe,
+  },
+  {
+    title: 'News',
+    description: 'Search articles and news',
+    value: 'news',
+    Icon: Newspaper,
+  },
+  {
+    title: 'Finance',
+    description: 'Search financial data',
+    value: 'finance',
+    Icon: Landmark,
+  },
+];
 
 const InputBar = ({
   includeSuggestions = false,
@@ -20,6 +60,7 @@ const InputBar = ({
   const router = useRouter();
 
   const [localMessage, setLocalMessage] = useState<string>('');
+  const [topic, setTopic] = useState<'general' | 'news' | 'finance'>('general');
 
   const { hasRecognitionSupport, startListening, stopListening, isListening } =
     useSpeechAPI({ onTextChange: setLocalMessage });
@@ -57,7 +98,7 @@ const InputBar = ({
     createMessage(localMessage);
     setLocalMessage('');
 
-    await streamChat(localMessage, checkpointId);
+    await streamChat(localMessage, checkpointId, topic);
   };
 
   const handleEnterPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -100,32 +141,49 @@ const InputBar = ({
             for a new line
           </p>
           <div className='flex gap-1'>
-            <Hint label='Set sources to search'>
-              <Button
-                size='icon'
-                variant='ghost'
-                className='group cursor-pointer'
-              >
-                <span className='sr-only'>Set sources to search</span>
-                <Globe
-                  className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
-                  strokeWidth={2.5}
-                />
-              </Button>
-            </Hint>
-            <Hint label='Attach file'>
-              <Button
-                size='icon'
-                variant='ghost'
-                className='group cursor-pointer'
-              >
-                <span className='sr-only'>Attach file</span>
-                <Paperclip
-                  className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
-                  strokeWidth={2.5}
-                />
-              </Button>
-            </Hint>
+            <Popover>
+              <Hint label='Set source to search'>
+                <PopoverTrigger asChild>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='group cursor-pointer'
+                  >
+                    <span className='sr-only'>Set source to search</span>
+                    <Globe
+                      className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                      strokeWidth={2.5}
+                    />
+                  </Button>
+                </PopoverTrigger>
+              </Hint>
+              <PopoverContent align='end'>
+                <ul className='space-y-5'>
+                  {TOPICS.map(({ title, description, value, Icon }, i) => (
+                    <li
+                      key={i}
+                      className='flex items-start justify-between gap-4 hover:cursor-pointer'
+                      onClick={() => setTopic(value)}
+                    >
+                      <div className='flex items-start gap-2'>
+                        <Icon className='size-4 mt-0.5 text-muted-foreground' />
+                        <p className='flex flex-col text-xs font-medium'>
+                          {title}
+                          <span className='text-xs font-normal text-muted-foreground'>
+                            {description}
+                          </span>
+                        </p>
+                      </div>
+                      <Switch
+                        className='mt-0.5'
+                        checked={topic === value}
+                        onCheckedChange={() => setTopic(value)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </PopoverContent>
+            </Popover>
             <Hint label='Speaker mode'>
               <Button
                 size='icon'
