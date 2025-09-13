@@ -1,15 +1,18 @@
-export interface SearchInfo {
-  stages: string[];
-  query: string;
-  urls: string[];
-  error?: string;
+export interface Source {
+  site: string;
+  site_icon?: string;
+  title: string;
+  url: string;
 }
 
 export interface Message {
   id: string;
-  content: string;
-  isUser: boolean;
   type: string;
   isLoading?: boolean;
-  searchInfo?: SearchInfo;
+  search: string;
+  content: string;
+  sources?: Source[];
+  images?: string[];
+  isSearching?: boolean;
+  error?: string;
 }

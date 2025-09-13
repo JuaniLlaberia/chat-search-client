@@ -1,7 +1,9 @@
+import { Source } from '@/types/index';
+
 interface StreamHandlers {
   onContent: (content: string) => void;
-  onSearchStart: (query: string) => void;
-  onSearchResults: (urls: string[]) => void;
+  onSearchStart: () => void;
+  onSearchResults: (sources: Source[], images: string[]) => void;
   onSearchError: (error: string) => void;
   onEnd: () => void;
   onError: (error: Event) => void;
@@ -14,6 +16,7 @@ export class ChatService {
   async streamChat(
     userInput: string,
     checkpointId: string | null,
+    topic: 'general' | 'news' | 'finance' = 'general',
     handlers: StreamHandlers
   ) {
     try {
@@ -22,6 +25,9 @@ export class ChatService {
       )}`;
       if (checkpointId) {
         url += `?checkpoint_id=${encodeURIComponent(checkpointId)}`;
+      }
+      if (topic) {
+        url += `?topic=${encodeURIComponent(topic)}`;
       }
 
       this.eventSource = new EventSource(url);
@@ -33,6 +39,7 @@ export class ChatService {
 
           switch (data.type) {
             case 'checkpoint':
+              console.log('Checkpoint', data.checkpoint_id);
               handlers.onCheckpoint(data.checkpoint_id);
               break;
 
@@ -42,15 +49,20 @@ export class ChatService {
               break;
 
             case 'search_start':
-              handlers.onSearchStart(data.query);
+              handlers.onSearchStart();
               break;
 
             case 'search_results':
-              const urls =
-                typeof data.urls === 'string'
-                  ? JSON.parse(data.urls)
-                  : data.urls;
-              handlers.onSearchResults(urls);
+              const sources =
+                typeof data.sources === 'string'
+                  ? JSON.parse(data.sources)
+                  : data.sources;
+              const images =
+                typeof data.images === 'string'
+                  ? JSON.parse(data.images)
+                  : data.images;
+
+              handlers.onSearchResults(sources, images);
               break;
 
             case 'search_error':
@@ -68,6 +80,7 @@ export class ChatService {
       };
 
       this.eventSource.onerror = error => {
+        console.log(error);
         console.error('EventSource error:', error);
         handlers.onError(error);
         this.close();
@@ -80,6 +93,7 @@ export class ChatService {
 
   close() {
     if (this.eventSource) {
+      console.log('CLOSSING');
       this.eventSource.close();
       this.eventSource = null;
     }
