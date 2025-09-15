@@ -55,7 +55,7 @@ export const useChatStream = ({
         },
 
         onEnd: () => {
-          onSearchUpdate({});
+          onSearchUpdate({ isSearching: false });
         },
 
         onError: () => {
