@@ -23,11 +23,16 @@ export class ChatService {
       let url = `http://127.0.0.1:8000/chat_stream/${encodeURIComponent(
         userInput
       )}`;
+      const params: string[] = [];
       if (checkpointId) {
-        url += `?checkpoint_id=${encodeURIComponent(checkpointId)}`;
+        params.push(`checkpoint_id=${encodeURIComponent(checkpointId)}`);
       }
       if (topic) {
-        url += `?topic=${encodeURIComponent(topic)}`;
+        params.push(`topic=${encodeURIComponent(topic)}`);
+      }
+
+      if (params.length > 0) {
+        url += `?${params.join('&')}`;
       }
 
       this.eventSource = new EventSource(url);
@@ -39,7 +44,6 @@ export class ChatService {
 
           switch (data.type) {
             case 'checkpoint':
-              console.log('Checkpoint', data.checkpoint_id);
               handlers.onCheckpoint(data.checkpoint_id);
               break;
 
@@ -80,8 +84,6 @@ export class ChatService {
       };
 
       this.eventSource.onerror = error => {
-        console.log(error);
-        console.error('EventSource error:', error);
         handlers.onError(error);
         this.close();
       };
