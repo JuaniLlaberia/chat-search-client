@@ -9,7 +9,6 @@ import {
   MicOff,
   Newspaper,
 } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
 import { type KeyboardEvent, useState } from 'react';
 
 import Hint from '../ui/hint';
@@ -22,7 +21,7 @@ import {
 import { Button } from '../ui/button';
 import { useSpeechAPI } from '@/hooks/use-speech-api';
 import { Switch } from '../ui/switch';
-import { useChatActions } from '@/hooks/use-chat-actions';
+import { useChatActions } from '@/features/chat/api/use-chat-actions';
 
 const TOPICS: {
   title: string;
@@ -55,9 +54,6 @@ const InputBar = ({
 }: {
   includeSuggestions: boolean;
 }) => {
-  const pathname = usePathname();
-  const router = useRouter();
-
   const [input, setInput] = useState<string>('');
   const [topic, setTopic] = useState<'general' | 'news' | 'finance'>('general');
 

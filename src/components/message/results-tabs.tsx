@@ -10,7 +10,7 @@ import { ContentDisplay } from './message-content';
 import { Button } from '../ui/button';
 import { useSpeechSynthesis } from '@/hooks/use-speech-synthesis';
 import { useCopyToClipboard } from '@/hooks/use-clipboard';
-import { useChatActions } from '@/hooks/use-chat-actions';
+import { useChatActions } from '@/features/chat/api/use-chat-actions';
 
 interface ResultsTabProps {
   sources?: Source[];
