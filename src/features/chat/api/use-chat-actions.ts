@@ -29,6 +29,9 @@ export const useChatActions = (options: UseChatActionsOptions = {}) => {
     onContent: content => {
       updateMessage({ content, isLoading: false });
     },
+    onFollowupQuestions: questions => {
+      updateMessage({ followupQuestions: questions });
+    },
     onSearchUpdate: searchInfo => {
       updateMessage({ ...searchInfo });
     },

@@ -50,6 +50,7 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
       content: '',
       sources: [],
       images: [],
+      followupQuestions: [],
     };
 
     setMessages(prev => [...prev, msg]);

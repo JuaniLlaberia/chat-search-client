@@ -6,6 +6,7 @@ import { Source } from '@/types/index';
 
 interface UseChatStreamProps {
   onContent: (content: string) => void;
+  onFollowupQuestions: (questions: string[]) => void;
   onSearchUpdate: ({
     sources,
     images,
@@ -23,6 +24,7 @@ interface UseChatStreamProps {
 
 export const useChatStream = ({
   onContent,
+  onFollowupQuestions,
   onSearchUpdate,
   onCheckpoint,
   onError,
@@ -40,6 +42,7 @@ export const useChatStream = ({
       try {
         await chatService.streamChat(userInput, checkpointId, topic, {
           onContent,
+          onFollowupQuestions,
           onSearchStart: () => onSearchUpdate({ isSearching: true }),
           onSearchResults: (sources, images) =>
             onSearchUpdate({ sources, images, isSearching: false }),
@@ -53,7 +56,7 @@ export const useChatStream = ({
         onError('Sorry, there was an error connecting to the server.');
       }
     },
-    [onContent, onSearchUpdate, onCheckpoint, onError]
+    [onContent, onFollowupQuestions, onSearchUpdate, onCheckpoint, onError]
   );
 
   const stopStream = useCallback(() => {
