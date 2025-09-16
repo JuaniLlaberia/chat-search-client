@@ -1,6 +1,13 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from 'react';
 import { Message } from '@/types';
 
 interface ChatContextType {
@@ -9,10 +16,12 @@ interface ChatContextType {
   setCurrentMessage: (message: string) => void;
   checkpointId: string | null;
   setCheckpointId: (id: string | null) => void;
+  isLoading: boolean;
 
   createMessage: (search: string) => void;
   updateMessage: (updates: Partial<Message>) => void;
   setMessageError: (errorContent: string) => void;
+  clearMessages: () => void;
 }
 
 export const ChatContext = createContext<ChatContextType | undefined>(
@@ -27,9 +36,12 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [checkpointId, setCheckpointId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const createMessage = (search: string) => {
+  const createMessage = useCallback((search: string) => {
     setCurrentMessage(search);
+    setIsLoading(true);
+
     const msg: Message = {
       id: `msg_${Date.now()}`,
       type: 'message',
@@ -41,40 +53,68 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
     };
 
     setMessages(prev => [...prev, msg]);
-  };
+  }, []);
 
-  const updateMessage = (updates: Partial<Message>) => {
+  const updateMessage = useCallback((updates: Partial<Message>) => {
     setMessages(prev => {
       if (prev.length === 0) return prev;
 
       const newMessages = [...prev];
+      const lastMessage = newMessages[newMessages.length - 1];
       newMessages[newMessages.length - 1] = {
-        ...newMessages[newMessages.length - 1],
+        ...lastMessage,
         ...updates,
       };
 
       return newMessages;
     });
-  };
 
-  const setMessageError = (errorContent: string) => {
-    updateMessage({
-      content: errorContent,
-      isLoading: false,
-    });
-  };
+    if ('isLoading' in updates) {
+      setIsLoading(updates.isLoading ?? false);
+    }
+  }, []);
 
-  const value: ChatContextType = {
-    messages,
-    currentMessage,
-    setCurrentMessage,
-    checkpointId,
-    setCheckpointId,
+  const setMessageError = useCallback(
+    (errorContent: string) => {
+      updateMessage({
+        content: errorContent,
+        isLoading: false,
+      });
+      setIsLoading(false);
+    },
+    [updateMessage]
+  );
 
-    createMessage,
-    updateMessage,
-    setMessageError,
-  };
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+    setCurrentMessage('');
+    setIsLoading(false);
+  }, []);
+
+  const value = useMemo<ChatContextType>(
+    () => ({
+      messages,
+      currentMessage,
+      setCurrentMessage,
+      checkpointId,
+      setCheckpointId,
+      isLoading,
+      createMessage,
+      updateMessage,
+      setMessageError,
+      clearMessages,
+    }),
+    [
+      messages,
+      currentMessage,
+      checkpointId,
+      isLoading,
+      createMessage,
+      updateMessage,
+      setMessageError,
+      clearMessages,
+    ]
+  );
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
