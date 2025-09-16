@@ -16,6 +16,7 @@ import { useCopyToClipboard } from '@/hooks/use-clipboard';
 import { useChatActions } from '@/features/chat/api/use-chat-actions';
 
 interface MessageFooterProps {
+  isVisible: boolean;
   isLoading?: boolean;
   isSearching?: boolean;
   search: string;
@@ -24,6 +25,7 @@ interface MessageFooterProps {
 }
 
 const MessageFooter = ({
+  isVisible,
   isLoading,
   isSearching,
   content,
@@ -88,7 +90,7 @@ const MessageFooter = ({
           </li>
         </ul>
       )}
-      {followupQuestions && !isLoading && !isSearching && (
+      {followupQuestions && !isLoading && !isSearching && isVisible && (
         <div>
           <h3 className='flex items-center gap-2 text-lg font-medium mb-3'>
             <span>

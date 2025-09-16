@@ -50,6 +50,7 @@ const Message = ({
         {sources && sources.length > 0 && <SourcesTab sources={sources} />}
         <StepsTab search={search} sources={sources} />
         <MessageFooter
+          isVisible={activeTab === 'results'}
           isLoading={isLoading}
           isSearching={isSearching}
           search={search}
