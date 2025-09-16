@@ -55,7 +55,7 @@ export const StepsTab = ({ search, sources }: StepsTabProps) => {
 
   return (
     <TabsContent value='steps'>
-      <div className='pb-48'>
+      <div>
         <div className='relative'>
           <div className='absolute left-[11px] top-4 bottom-4 w-0.5 bg-border' />
 
