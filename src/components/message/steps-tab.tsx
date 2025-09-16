@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactElement } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Source } from '@/types/index';
@@ -10,42 +11,47 @@ interface StepsTabProps {
 }
 
 export const StepsTab = ({ search, sources }: StepsTabProps) => {
-  const steps = [
-    {
-      title: 'Starting Search...',
-      content: (
-        <p className='text-sm text-muted-foreground leading-relaxed'>
-          {search}
-        </p>
-      ),
-    },
-    {
-      title: `Reading ${sources?.length || 0} Sources...`,
-      content: (
-        <ul className='space-y-2'>
-          {sources?.map(({ site_icon, url, site }) => (
-            <li key={url} className='flex items-center gap-2'>
-              <Avatar className='size-4'>
-                <AvatarImage className='rounded-full' src={site_icon} />
-                <AvatarFallback className='bg-purple-500 rounded-full'>
-                  {site[0].toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <p className='line-clamp-1 text-sm text-muted-foreground leading-relaxed'>
-                {url}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ),
-    },
-    {
-      title: 'Results Found',
-    },
-    {
-      title: 'Building answer...',
-    },
-  ];
+  const steps: { title: string; content?: ReactElement }[] = [];
+
+  if (sources?.length) {
+    steps.push(
+      {
+        title: 'Starting Search',
+        content: (
+          <p className='text-sm text-muted-foreground leading-relaxed'>
+            {search}
+          </p>
+        ),
+      },
+      {
+        title: `Reading ${sources?.length || 0} Sources`,
+        content: (
+          <ul className='space-y-2'>
+            {sources?.map(({ site_icon, url, site }) => (
+              <li key={url} className='flex items-center gap-2'>
+                <Avatar className='size-4'>
+                  <AvatarImage className='rounded-full' src={site_icon} />
+                  <AvatarFallback className='bg-purple-500 rounded-full'>
+                    {site[0].toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <p className='line-clamp-1 text-sm text-muted-foreground leading-relaxed'>
+                  {url}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ),
+      },
+      {
+        title: 'Results Found',
+      }
+    );
+  }
+
+  steps.push({
+    title: 'Building answer',
+  });
 
   return (
     <TabsContent value='steps'>

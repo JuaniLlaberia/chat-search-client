@@ -12,6 +12,7 @@ interface StreamHandlers {
 
 export class ChatService {
   private eventSource: EventSource | null = null;
+  private isConnected = false;
 
   async streamChat(
     userInput: string,
@@ -19,19 +20,17 @@ export class ChatService {
     topic: 'general' | 'news' | 'finance' = 'general',
     handlers: StreamHandlers
   ) {
-    try {
-      let url = `http://127.0.0.1:8000/chat_stream/${encodeURIComponent(
-        userInput
-      )}`;
-      if (checkpointId) {
-        url += `?checkpoint_id=${encodeURIComponent(checkpointId)}`;
-      }
-      if (topic) {
-        url += `?topic=${encodeURIComponent(topic)}`;
-      }
+    this.close();
 
+    try {
+      const url = this.buildUrl(userInput, checkpointId, topic);
       this.eventSource = new EventSource(url);
+      this.isConnected = true;
       let streamedContent = '';
+
+      this.eventSource.onopen = () => {
+        console.log('EventSource connection opened');
+      };
 
       this.eventSource.onmessage = event => {
         try {
@@ -39,7 +38,6 @@ export class ChatService {
 
           switch (data.type) {
             case 'checkpoint':
-              console.log('Checkpoint', data.checkpoint_id);
               handlers.onCheckpoint(data.checkpoint_id);
               break;
 
@@ -53,15 +51,8 @@ export class ChatService {
               break;
 
             case 'search_results':
-              const sources =
-                typeof data.sources === 'string'
-                  ? JSON.parse(data.sources)
-                  : data.sources;
-              const images =
-                typeof data.images === 'string'
-                  ? JSON.parse(data.images)
-                  : data.images;
-
+              const sources = this.parseJsonField(data.sources);
+              const images = this.parseJsonField(data.images);
               handlers.onSearchResults(sources, images);
               break;
 
@@ -76,26 +67,56 @@ export class ChatService {
           }
         } catch (error) {
           console.error('Error parsing event data:', error);
+          handlers.onError(error as Event);
         }
       };
 
       this.eventSource.onerror = error => {
-        console.log(error);
         console.error('EventSource error:', error);
         handlers.onError(error);
         this.close();
       };
     } catch (error) {
       console.error('Error setting up EventSource:', error);
+      this.close();
       throw error;
     }
   }
 
+  private buildUrl(
+    userInput: string,
+    checkpointId: string | null,
+    topic: string
+  ): string {
+    const url = `http://127.0.0.1:8000/chat_stream/${encodeURIComponent(
+      userInput
+    )}`;
+    const params: string[] = [];
+
+    if (checkpointId) {
+      params.push(`checkpoint_id=${encodeURIComponent(checkpointId)}`);
+    }
+    if (topic) {
+      params.push(`topic=${encodeURIComponent(topic)}`);
+    }
+
+    return params.length > 0 ? `${url}?${params.join('&')}` : url;
+  }
+
+  private parseJsonField<T = unknown>(field: string | T): T {
+    return typeof field === 'string' ? JSON.parse(field) : field;
+  }
+
   close() {
-    if (this.eventSource) {
-      console.log('CLOSSING');
+    if (this.eventSource && this.isConnected) {
+      console.log('Closing EventSource connection');
       this.eventSource.close();
       this.eventSource = null;
+      this.isConnected = false;
     }
+  }
+
+  isActive(): boolean {
+    return this.isConnected && this.eventSource !== null;
   }
 }

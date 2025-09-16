@@ -13,15 +13,20 @@ export const ImagesTab = ({ images }: ImagesTabProps) => {
     <TabsContent value='images'>
       <div className='pb-48'>
         <h2 className='text-lg font-medium mb-4'>Images</h2>
-        <div className='grid grid-cols-2 gap-4'>
+        <div className='grid grid-cols-3 gap-4'>
           {images.map((img, index) => (
             <li key={img || index}>
               <Link
                 href={img}
                 target='_blank'
-                className='relative h-48 w-auto bg-accent rounded-lg flex items-center justify-center overflow-hidden'
+                className='relative h-64 w-auto bg-accent rounded-lg flex items-center justify-center overflow-hidden'
               >
-                <Image src={img} alt='' fill />
+                <Image
+                  src={img}
+                  alt={`Image ${index}`}
+                  fill
+                  className='object-cover object-top'
+                />
               </Link>
             </li>
           ))}

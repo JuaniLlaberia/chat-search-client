@@ -9,7 +9,6 @@ import {
   MicOff,
   Newspaper,
 } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
 import { type KeyboardEvent, useState } from 'react';
 
 import Hint from '../ui/hint';
@@ -20,10 +19,9 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '../ui/button';
-import { useChat } from '@/contexts/chat-context';
-import { useChatStream } from '@/hooks/use-chat-stream';
 import { useSpeechAPI } from '@/hooks/use-speech-api';
 import { Switch } from '../ui/switch';
+import { useChatActions } from '@/features/chat/api/use-chat-actions';
 
 const TOPICS: {
   title: string;
@@ -56,57 +54,34 @@ const InputBar = ({
 }: {
   includeSuggestions: boolean;
 }) => {
-  const pathname = usePathname();
-  const router = useRouter();
-
-  const [localMessage, setLocalMessage] = useState<string>('');
+  const [input, setInput] = useState<string>('');
   const [topic, setTopic] = useState<'general' | 'news' | 'finance'>('general');
 
   const { hasRecognitionSupport, startListening, stopListening, isListening } =
-    useSpeechAPI({ onTextChange: setLocalMessage });
+    useSpeechAPI({ onTextChange: setInput });
 
-  const {
-    checkpointId,
-    setCheckpointId,
-
-    createMessage,
-    updateMessage,
-    setMessageError,
-  } = useChat();
-
-  const { streamChat } = useChatStream({
-    onContent: content => {
-      updateMessage({ content, isLoading: false });
-    },
-    onSearchUpdate: searchInfo => {
-      updateMessage({ ...searchInfo });
-    },
-    onCheckpoint: newCheckpointId => {
-      setCheckpointId(newCheckpointId);
-    },
-    onError: errorMessage => {
-      setMessageError(errorMessage);
-    },
+  const { sendMessage, isLoading } = useChatActions({
+    topic,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!localMessage.trim()) return;
+    if (!input.trim()) return;
 
-    if (pathname !== '/search') router.push('/search');
-
-    createMessage(localMessage);
-    setLocalMessage('');
-
-    await streamChat(localMessage, checkpointId, topic);
+    try {
+      await sendMessage(input);
+      setInput('');
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
   };
 
   const handleEnterPress = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       if (e.shiftKey) {
-        setLocalMessage(prev => prev + '\n');
-      } else if (localMessage.trim() !== '') {
+        setInput(prev => prev + '\n');
+      } else if (input.trim() !== '') {
         handleSubmit(e);
       }
     }
@@ -123,8 +98,8 @@ const InputBar = ({
             autoFocus
             placeholder='What do you have in mind?'
             className='outline-none bg-transparent border-transparent w-full pr-10 h-16 resize-none placeholder:text-muted-foreground'
-            value={localMessage}
-            onChange={e => setLocalMessage(e.target.value)}
+            value={input}
+            onChange={e => setInput(e.target.value)}
             onKeyDown={handleEnterPress}
           />
         </div>
@@ -217,7 +192,7 @@ const InputBar = ({
               size='icon'
               variant='special'
               type='submit'
-              disabled={!localMessage}
+              disabled={!input || isLoading}
               className='cursor-pointer'
             >
               <ArrowRight className='size-6' strokeWidth={2.5} />
@@ -225,7 +200,7 @@ const InputBar = ({
           </div>
         </div>
       </form>
-      {includeSuggestions && <SearchSuggestions setSearch={setLocalMessage} />}
+      {includeSuggestions && <SearchSuggestions setSearch={setInput} />}
     </>
   );
 };

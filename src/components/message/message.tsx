@@ -46,6 +46,7 @@ const Message = ({
 
         <ResultsTab
           sources={sources}
+          search={search}
           content={content}
           isLoading={isLoading}
           isSearching={isSearching}
