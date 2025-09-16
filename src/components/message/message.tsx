@@ -1,24 +1,18 @@
 'use client';
 
 import { useState, memo } from 'react';
+
+import MessageFooter from './message-footer';
 import { Tabs } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { Source } from '@/types/index';
-
+import { Message as MessageType } from '@/types/index';
 import { MessageHeader } from './message-header';
 import { ResultsTab } from './results-tabs';
 import { ImagesTab } from './images-tab';
 import { SourcesTab } from './sources-tab';
 import { StepsTab } from './steps-tab';
 
-interface MessageProps {
-  id: string;
-  search: string;
-  content: string;
-  sources?: Source[];
-  images?: string[];
-  isLoading?: boolean;
-  isSearching?: boolean;
+interface MessageProps extends MessageType {
   isLastMessage: boolean;
 }
 
@@ -28,6 +22,7 @@ const Message = ({
   sources,
   images,
   content,
+  followupQuestions,
   isLoading,
   isSearching,
   isLastMessage,
@@ -36,14 +31,13 @@ const Message = ({
 
   return (
     <li key={id} className={cn(isLastMessage ? 'h-[85vh] mb-0' : 'mb-8')}>
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='pb-48'>
         <MessageHeader
           search={search}
           sources={sources}
           images={images}
           isLoading={isLoading}
         />
-
         <ResultsTab
           sources={sources}
           search={search}
@@ -52,12 +46,16 @@ const Message = ({
           isSearching={isSearching}
           onViewAllSources={() => setActiveTab('sources')}
         />
-
         {images && images.length > 0 && <ImagesTab images={images} />}
-
         {sources && sources.length > 0 && <SourcesTab sources={sources} />}
-
         <StepsTab search={search} sources={sources} />
+        <MessageFooter
+          isLoading={isLoading}
+          isSearching={isSearching}
+          search={search}
+          content={content}
+          followupQuestions={followupQuestions}
+        />
       </Tabs>
     </li>
   );

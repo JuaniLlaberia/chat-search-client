@@ -22,7 +22,16 @@ const MessageArea = () => {
       <ul className='w-full md:max-w-[50%] p-2 py-6'>
         {messages.map(
           (
-            { id, content, search, sources, images, isLoading, isSearching },
+            {
+              id,
+              content,
+              search,
+              sources,
+              followupQuestions,
+              images,
+              isLoading,
+              isSearching,
+            },
             i
           ) => (
             <Message
@@ -31,6 +40,7 @@ const MessageArea = () => {
               search={search}
               sources={sources}
               content={content}
+              followupQuestions={followupQuestions}
               images={images}
               isLoading={isLoading}
               isSearching={isSearching}
