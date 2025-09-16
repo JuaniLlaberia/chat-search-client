@@ -7,10 +7,11 @@ export interface Source {
 
 export interface Message {
   id: string;
-  type: string;
+  type?: string;
   isLoading?: boolean;
   search: string;
   content: string;
+  followupQuestions?: string[];
   sources?: Source[];
   images?: string[];
   isSearching?: boolean;

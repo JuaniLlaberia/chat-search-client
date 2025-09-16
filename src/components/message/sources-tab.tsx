@@ -12,7 +12,7 @@ interface SourcesTabProps {
 export const SourcesTab = ({ sources }: SourcesTabProps) => {
   return (
     <TabsContent value='sources'>
-      <div className='pb-48'>
+      <div>
         <h2 className='text-lg font-medium mb-4'>All Sources</h2>
         <ul className='space-y-4'>
           {sources.map(({ site, url, title, site_icon }, i) => (

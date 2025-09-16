@@ -11,7 +11,7 @@ interface ImagesTabProps {
 export const ImagesTab = ({ images }: ImagesTabProps) => {
   return (
     <TabsContent value='images'>
-      <div className='pb-48'>
+      <div>
         <h2 className='text-lg font-medium mb-4'>Images</h2>
         <div className='grid grid-cols-3 gap-4'>
           {images.map((img, index) => (

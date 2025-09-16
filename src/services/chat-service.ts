@@ -2,6 +2,7 @@ import { Source } from '@/types/index';
 
 interface StreamHandlers {
   onContent: (content: string) => void;
+  onFollowupQuestions: (questions: string[]) => void;
   onSearchStart: () => void;
   onSearchResults: (sources: Source[], images: string[]) => void;
   onSearchError: (error: string) => void;
@@ -44,6 +45,10 @@ export class ChatService {
             case 'content':
               streamedContent += data.content;
               handlers.onContent(streamedContent);
+              break;
+
+            case 'followup_questions':
+              handlers.onFollowupQuestions(data.questions);
               break;
 
             case 'search_start':
