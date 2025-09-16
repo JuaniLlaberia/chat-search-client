@@ -1,7 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
-
+import { useRef, useCallback } from 'react';
 import { ChatService } from '@/services/chat-service';
 import { Source } from '@/types/index';
 
@@ -11,6 +10,7 @@ interface UseChatStreamProps {
     sources,
     images,
     error,
+    isSearching,
   }: {
     sources?: Source[];
     images?: string[];
@@ -29,47 +29,40 @@ export const useChatStream = ({
 }: UseChatStreamProps) => {
   const chatServiceRef = useRef<ChatService>(new ChatService());
 
-  const streamChat = async (
-    userInput: string,
-    checkpointId: string | null,
-    topic: 'general' | 'news' | 'finance' = 'general'
-  ) => {
-    const chatService = chatServiceRef.current;
+  const streamChat = useCallback(
+    async (
+      userInput: string,
+      checkpointId: string | null,
+      topic: 'general' | 'news' | 'finance' = 'general'
+    ) => {
+      const chatService = chatServiceRef.current;
 
-    try {
-      await chatService.streamChat(userInput, checkpointId, topic, {
-        onContent: content => {
-          onContent(content);
-        },
+      try {
+        await chatService.streamChat(userInput, checkpointId, topic, {
+          onContent,
+          onSearchStart: () => onSearchUpdate({ isSearching: true }),
+          onSearchResults: (sources, images) =>
+            onSearchUpdate({ sources, images, isSearching: false }),
+          onSearchError: error => onSearchUpdate({ error, isSearching: false }),
+          onEnd: () => onSearchUpdate({ isSearching: false }),
+          onError: () =>
+            onError('Sorry, there was an error processing your request.'),
+          onCheckpoint,
+        });
+      } catch {
+        onError('Sorry, there was an error connecting to the server.');
+      }
+    },
+    [onContent, onSearchUpdate, onCheckpoint, onError]
+  );
 
-        onSearchStart: () => {
-          onSearchUpdate({ isSearching: true });
-        },
+  const stopStream = useCallback(() => {
+    chatServiceRef.current.close();
+  }, []);
 
-        onSearchResults: (sources, images) => {
-          onSearchUpdate({ sources, images, isSearching: false });
-        },
-
-        onSearchError: error => {
-          onSearchUpdate({ error, isSearching: false });
-        },
-
-        onEnd: () => {
-          onSearchUpdate({ isSearching: false });
-        },
-
-        onError: () => {
-          onError('Sorry, there was an error processing your request.');
-        },
-
-        onCheckpoint: checkpointId => {
-          onCheckpoint(checkpointId);
-        },
-      });
-    } catch {
-      onError('Sorry, there was an error connecting to the server.');
-    }
+  return {
+    streamChat,
+    stopStream,
+    isStreaming: () => chatServiceRef.current.isActive(),
   };
-
-  return { streamChat };
 };
