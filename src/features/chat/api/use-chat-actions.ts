@@ -9,6 +9,7 @@ import { useChatStream } from './use-chat-stream';
 interface UseChatActionsOptions {
   redirectPath?: string;
   topic?: 'general' | 'news' | 'finance';
+  mode?: 'informative' | 'timeline';
   autoRedirect?: boolean;
 }
 
@@ -32,6 +33,9 @@ export const useChatActions = (options: UseChatActionsOptions = {}) => {
     onFollowupQuestions: questions => {
       updateMessage({ followupQuestions: questions });
     },
+    onTimelineUpdate: ({ events, isGeneratingTimeline }) => {
+      updateMessage({ events, isGeneratingTimeline });
+    },
     onSearchUpdate: searchInfo => {
       updateMessage({ ...searchInfo });
     },
@@ -44,7 +48,11 @@ export const useChatActions = (options: UseChatActionsOptions = {}) => {
   });
 
   const sendMessage = useCallback(
-    async (message: string, customTopic?: 'general' | 'news' | 'finance') => {
+    async (
+      message: string,
+      customTopic?: 'general' | 'news' | 'finance',
+      mode: 'informative' | 'timeline' = 'informative'
+    ) => {
       if (!message.trim()) {
         throw new Error('Message cannot be empty');
       }
@@ -58,13 +66,14 @@ export const useChatActions = (options: UseChatActionsOptions = {}) => {
         router.push(redirectPath);
       }
 
-      createMessage(message);
+      createMessage(message, mode);
 
       try {
         await streamChat(
           message,
           checkpointId,
-          customTopic || options.topic || 'general'
+          customTopic || options.topic || 'general',
+          mode || options.mode || 'informative'
         );
       } catch (error) {
         setMessageError('Failed to send message');
