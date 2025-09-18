@@ -19,31 +19,37 @@ const MessageArea = () => {
 
   return (
     <div className='flex items-start justify-center'>
-      <ul className='w-full md:max-w-[50%] p-2 py-6'>
+      <ul className='w-full md:max-w-3xl p-2 py-6'>
         {messages.map(
           (
             {
               id,
+              type,
               content,
               search,
               sources,
               followupQuestions,
               images,
+              events,
               isLoading,
               isSearching,
+              isGeneratingTimeline,
             },
             i
           ) => (
             <Message
               key={id}
               id={id}
+              type={type}
               search={search}
               sources={sources}
               content={content}
+              events={events}
               followupQuestions={followupQuestions}
               images={images}
               isLoading={isLoading}
               isSearching={isSearching}
+              isGeneratingTimeline={isGeneratingTimeline}
               isLastMessage={i + 1 === messages.length}
             />
           )

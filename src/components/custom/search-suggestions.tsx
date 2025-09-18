@@ -43,7 +43,7 @@ const SearchSuggestions = ({
   setSearch: Dispatch<SetStateAction<string>>;
 }) => {
   return (
-    <ul className='flex justify-center gap-4 mt-8'>
+    <ul className='flex justify-center flex-wrap gap-4 mt-8'>
       {SUGGESTIONS.map(({ icon, label, search }) => (
         <li
           key={label}

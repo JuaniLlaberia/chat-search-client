@@ -2,11 +2,18 @@
 
 import { useRef, useCallback } from 'react';
 import { ChatService } from '@/services/chat-service';
-import { Source } from '@/types/index';
+import { Source, TimelineEvent } from '@/types/index';
 
 interface UseChatStreamProps {
   onContent: (content: string) => void;
   onFollowupQuestions: (questions: string[]) => void;
+  onTimelineUpdate: ({
+    events,
+    isGeneratingTimeline,
+  }: {
+    events?: TimelineEvent[];
+    isGeneratingTimeline?: boolean;
+  }) => void;
   onSearchUpdate: ({
     sources,
     images,
@@ -26,6 +33,7 @@ export const useChatStream = ({
   onContent,
   onFollowupQuestions,
   onSearchUpdate,
+  onTimelineUpdate,
   onCheckpoint,
   onError,
 }: UseChatStreamProps) => {
@@ -35,17 +43,23 @@ export const useChatStream = ({
     async (
       userInput: string,
       checkpointId: string | null,
-      topic: 'general' | 'news' | 'finance' = 'general'
+      topic: 'general' | 'news' | 'finance' = 'general',
+      mode: 'informative' | 'timeline'
     ) => {
       const chatService = chatServiceRef.current;
 
       try {
-        await chatService.streamChat(userInput, checkpointId, topic, {
+        await chatService.streamChat(userInput, checkpointId, topic, mode, {
           onContent,
           onFollowupQuestions,
           onSearchStart: () => onSearchUpdate({ isSearching: true }),
           onSearchResults: (sources, images) =>
             onSearchUpdate({ sources, images, isSearching: false }),
+          onTimelineStart: () =>
+            onTimelineUpdate({ isGeneratingTimeline: true }),
+          onTimelineResults: events => {
+            onTimelineUpdate({ events, isGeneratingTimeline: false });
+          },
           onSearchError: error => onSearchUpdate({ error, isSearching: false }),
           onEnd: () => onSearchUpdate({ isSearching: false }),
           onError: () =>
@@ -56,7 +70,14 @@ export const useChatStream = ({
         onError('Sorry, there was an error connecting to the server.');
       }
     },
-    [onContent, onFollowupQuestions, onSearchUpdate, onCheckpoint, onError]
+    [
+      onContent,
+      onFollowupQuestions,
+      onSearchUpdate,
+      onTimelineUpdate,
+      onCheckpoint,
+      onError,
+    ]
   );
 
   const stopStream = useCallback(() => {

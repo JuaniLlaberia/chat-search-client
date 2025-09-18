@@ -1,10 +1,15 @@
-import { Source } from '@/types/index';
+import { Source, TimelineEvent } from '@/types/index';
 
 interface StreamHandlers {
   onContent: (content: string) => void;
   onFollowupQuestions: (questions: string[]) => void;
   onSearchStart: () => void;
   onSearchResults: (sources: Source[], images: string[]) => void;
+  onTimelineStart: () => void;
+  onTimelineResults: (
+    events: TimelineEvent[],
+    isGeneratingTimeline?: boolean
+  ) => void;
   onSearchError: (error: string) => void;
   onEnd: () => void;
   onError: (error: Event) => void;
@@ -19,12 +24,13 @@ export class ChatService {
     userInput: string,
     checkpointId: string | null,
     topic: 'general' | 'news' | 'finance' = 'general',
+    mode: 'informative' | 'timeline',
     handlers: StreamHandlers
   ) {
     this.close();
 
     try {
-      const url = this.buildUrl(userInput, checkpointId, topic);
+      const url = this.buildUrl(userInput, checkpointId, topic, mode);
       this.eventSource = new EventSource(url);
       this.isConnected = true;
       let streamedContent = '';
@@ -45,6 +51,15 @@ export class ChatService {
             case 'content':
               streamedContent += data.content;
               handlers.onContent(streamedContent);
+              break;
+
+            case 'timeline_generation_start':
+              handlers.onTimelineStart();
+              break;
+
+            case 'timeline_content':
+              const events = this.parseJsonField(data.events);
+              handlers.onTimelineResults(events);
               break;
 
             case 'followup_questions':
@@ -91,7 +106,8 @@ export class ChatService {
   private buildUrl(
     userInput: string,
     checkpointId: string | null,
-    topic: string
+    topic: string,
+    mode: string
   ): string {
     const url = `http://127.0.0.1:8000/chat_stream/${encodeURIComponent(
       userInput
@@ -103,6 +119,9 @@ export class ChatService {
     }
     if (topic) {
       params.push(`topic=${encodeURIComponent(topic)}`);
+    }
+    if (mode) {
+      params.push(`mode=${encodeURIComponent(mode)}`);
     }
 
     return params.length > 0 ? `${url}?${params.join('&')}` : url;

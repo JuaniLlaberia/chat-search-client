@@ -18,7 +18,7 @@ interface ChatContextType {
   setCheckpointId: (id: string | null) => void;
   isLoading: boolean;
 
-  createMessage: (search: string) => void;
+  createMessage: (search: string, mode: 'informative' | 'timeline') => void;
   updateMessage: (updates: Partial<Message>) => void;
   setMessageError: (errorContent: string) => void;
   clearMessages: () => void;
@@ -38,23 +38,29 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
   const [checkpointId, setCheckpointId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const createMessage = useCallback((search: string) => {
-    setCurrentMessage(search);
-    setIsLoading(true);
+  const createMessage = useCallback(
+    (search: string, mode: 'informative' | 'timeline' = 'informative') => {
+      setCurrentMessage(search);
+      setIsLoading(true);
 
-    const msg: Message = {
-      id: `msg_${Date.now()}`,
-      type: 'message',
-      isLoading: true,
-      search,
-      content: '',
-      sources: [],
-      images: [],
-      followupQuestions: [],
-    };
+      const msg: Message = {
+        id: `msg_${Date.now()}`,
+        type: mode,
+        isLoading: true,
+        search,
+        content: '',
+        sources: [],
+        images: [],
+        followupQuestions: [],
+        events: [],
+        isSearching: mode === 'informative' ? false : true,
+        isGeneratingTimeline: mode === 'informative' ? false : true,
+      };
 
-    setMessages(prev => [...prev, msg]);
-  }, []);
+      setMessages(prev => [...prev, msg]);
+    },
+    []
+  );
 
   const updateMessage = useCallback((updates: Partial<Message>) => {
     setMessages(prev => {
