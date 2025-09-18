@@ -19,7 +19,7 @@ const MessageArea = () => {
 
   return (
     <div className='flex items-start justify-center'>
-      <ul className='w-full md:max-w-[50%] p-2 py-6'>
+      <ul className='w-full md:max-w-3xl p-2 py-6'>
         {messages.map(
           (
             {

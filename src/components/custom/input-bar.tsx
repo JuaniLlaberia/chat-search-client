@@ -131,8 +131,8 @@ const InputBar = ({
             onKeyDown={handleEnterPress}
           />
         </div>
-        <div className='flex items-center justify-between'>
-          <p className='text-xs text-muted-foreground font-light'>
+        <div className='flex items-center justify-end md:justify-between'>
+          <p className='text-xs text-muted-foreground font-light hidden md:block'>
             Use{' '}
             <span className='bg-muted p-1 px-1.5 rounded-md text-primary'>
               Shift
