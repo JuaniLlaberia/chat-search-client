@@ -2,12 +2,17 @@
 
 import {
   ArrowRight,
+  CalendarRange,
+  Check,
   Globe,
   Landmark,
   LucideIcon,
   MicIcon,
   MicOff,
   Newspaper,
+  Search,
+  Shapes,
+  X,
 } from 'lucide-react';
 import { type KeyboardEvent, useState } from 'react';
 
@@ -22,6 +27,7 @@ import { Button } from '../ui/button';
 import { useSpeechAPI } from '@/hooks/use-speech-api';
 import { Switch } from '../ui/switch';
 import { useChatActions } from '@/features/chat/api/use-chat-actions';
+import { cn } from '@/lib/utils';
 
 const TOPICS: {
   title: string;
@@ -49,6 +55,26 @@ const TOPICS: {
   },
 ];
 
+const MODES: {
+  title: string;
+  description: string;
+  value: 'informative' | 'timeline';
+  Icon: LucideIcon;
+}[] = [
+  {
+    title: 'Informative',
+    description: 'Answers for questions and searches',
+    value: 'informative',
+    Icon: Search,
+  },
+  {
+    title: 'Timeline',
+    description: 'Build a timeline containing detailed events',
+    value: 'timeline',
+    Icon: CalendarRange,
+  },
+];
+
 const InputBar = ({
   includeSuggestions = false,
 }: {
@@ -56,12 +82,14 @@ const InputBar = ({
 }) => {
   const [input, setInput] = useState<string>('');
   const [topic, setTopic] = useState<'general' | 'news' | 'finance'>('general');
+  const [mode, setMode] = useState<'informative' | 'timeline'>('informative');
 
   const { hasRecognitionSupport, startListening, stopListening, isListening } =
     useSpeechAPI({ onTextChange: setInput });
 
   const { sendMessage, isLoading } = useChatActions({
     topic,
+    mode,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,7 +97,7 @@ const InputBar = ({
     if (!input.trim()) return;
 
     try {
-      await sendMessage(input);
+      await sendMessage(input, topic, mode);
       setInput('');
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -116,6 +144,66 @@ const InputBar = ({
             for a new line
           </p>
           <div className='flex gap-1'>
+            {mode !== 'informative' && (
+              <div className='flex items-center justify-between gap-3 text-sm border rounded-lg border-purple-700 bg-purple-800/20 px-2 mr-2'>
+                <div className='flex items-center gap-2'>
+                  <CalendarRange className='size-4 text-muted-foreground' />
+                  <p>Timeline</p>
+                </div>
+                <button
+                  className='text-muted-foreground p-1 hover:bg-purple-800/30 rounded hover:cursor-pointer'
+                  onClick={() => setMode('informative')}
+                >
+                  <X className='size-4' />
+                </button>
+              </div>
+            )}
+            <Popover>
+              <Hint label='Change mode'>
+                <PopoverTrigger asChild>
+                  <Button
+                    size='icon'
+                    variant='ghost'
+                    className='group cursor-pointer'
+                  >
+                    <span className='sr-only'>Change chat mode</span>
+                    <Shapes
+                      className='size-6 text-muted-foreground/70 group-hover:text-muted-foreground'
+                      strokeWidth={2.5}
+                    />
+                  </Button>
+                </PopoverTrigger>
+              </Hint>
+              <PopoverContent align='end' className='p-2 w-82'>
+                <ul className='space-y-2'>
+                  {MODES.map(({ title, description, value, Icon }, i) => (
+                    <li
+                      key={i}
+                      className={cn(
+                        'flex items-center justify-between gap-4 hover:cursor-pointer p-2 border border-transparent rounded transition-colors',
+                        mode === value
+                          ? 'border-purple-700 bg-purple-800/20 hover:bg-purple-800/25'
+                          : 'hover:bg-accent/25'
+                      )}
+                      onClick={() => setMode(value)}
+                    >
+                      <div className='flex items-start gap-3'>
+                        <Icon className='size-4 mt-0.5 text-muted-foreground' />
+                        <p className='flex flex-col text-xs font-medium'>
+                          {title}
+                          <span className='text-xs font-normal text-muted-foreground'>
+                            {description}
+                          </span>
+                        </p>
+                      </div>
+                      {mode === value && (
+                        <Check className='size-4 text-muted-foreground' />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </PopoverContent>
+            </Popover>
             <Popover>
               <Hint label='Set source to search'>
                 <PopoverTrigger asChild>
