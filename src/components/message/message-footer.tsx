@@ -19,6 +19,7 @@ interface MessageFooterProps {
   isVisible: boolean;
   isLoading?: boolean;
   isSearching?: boolean;
+  isGeneratingTimeline?: boolean;
   search: string;
   content: string;
   followupQuestions?: string[];
@@ -28,6 +29,7 @@ const MessageFooter = ({
   isVisible,
   isLoading,
   isSearching,
+  isGeneratingTimeline,
   content,
   search,
   followupQuestions,
@@ -46,7 +48,7 @@ const MessageFooter = ({
 
   return (
     <div className='mt-6 space-y-6'>
-      {!isLoading && !isSearching && content && (
+      {!isLoading && !isSearching && !isGeneratingTimeline && content && (
         <ul className='flex items-center gap-2'>
           <li>
             <Hint label='Copy' side='bottom'>
@@ -90,28 +92,32 @@ const MessageFooter = ({
           </li>
         </ul>
       )}
-      {followupQuestions && !isLoading && !isSearching && isVisible && (
-        <div>
-          <h3 className='flex items-center gap-2 text-lg font-medium mb-3'>
-            <span>
-              <MessageCircleQuestionMark className='size-5' />
-            </span>
-            Followup
-          </h3>
-          <ul>
-            {followupQuestions.map(question => (
-              <li
-                key={question}
-                className='flex items-center justify-between gap-8 text-muted-foreground pr-3 py-3 border-b border-border first:border-t last:border-0 group hover:bg-accent/25 hover:text-primary hover:cursor-pointer'
-                onClick={() => sendMessage(question)}
-              >
-                {question}
-                <ArrowRight className='size-4 transition-transform group-hover:translate-x-1' />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {followupQuestions &&
+        !isLoading &&
+        !isSearching &&
+        !isGeneratingTimeline &&
+        isVisible && (
+          <div>
+            <h3 className='flex items-center gap-2 text-lg font-medium mb-3'>
+              <span>
+                <MessageCircleQuestionMark className='size-5' />
+              </span>
+              Followup
+            </h3>
+            <ul>
+              {followupQuestions.map(question => (
+                <li
+                  key={question}
+                  className='flex items-center justify-between gap-8 text-muted-foreground pr-3 py-3 border-b border-border first:border-t last:border-0 group hover:bg-accent/25 hover:text-primary hover:cursor-pointer'
+                  onClick={() => sendMessage(question)}
+                >
+                  {question}
+                  <ArrowRight className='size-4 transition-transform group-hover:translate-x-1' />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
     </div>
   );
 };

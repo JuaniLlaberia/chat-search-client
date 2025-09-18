@@ -18,13 +18,16 @@ interface MessageProps extends MessageType {
 
 const Message = ({
   id,
+  type,
   search,
   sources,
   images,
   content,
+  events,
   followupQuestions,
   isLoading,
   isSearching,
+  isGeneratingTimeline,
   isLastMessage,
 }: MessageProps) => {
   const [activeTab, setActiveTab] = useState<string>('results');
@@ -39,11 +42,14 @@ const Message = ({
           isLoading={isLoading}
         />
         <ResultsTab
+          type={type}
           sources={sources}
           search={search}
           content={content}
+          events={events}
           isLoading={isLoading}
           isSearching={isSearching}
+          isGeneratingTimeline={isGeneratingTimeline}
           onViewAllSources={() => setActiveTab('sources')}
         />
         {images && images.length > 0 && <ImagesTab images={images} />}
@@ -53,6 +59,7 @@ const Message = ({
           isVisible={activeTab === 'results'}
           isLoading={isLoading}
           isSearching={isSearching}
+          isGeneratingTimeline={isGeneratingTimeline}
           search={search}
           content={content}
           followupQuestions={followupQuestions}
