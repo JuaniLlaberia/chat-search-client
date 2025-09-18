@@ -28,7 +28,7 @@ export const ContentDisplay = ({
   isSearching,
   isGeneratingTimeline,
 }: ContentDisplayProps) => {
-  if (isSearching && isLoading && !isGeneratingTimeline) {
+  if ((isSearching && isLoading) || (isSearching && isGeneratingTimeline)) {
     return (
       <AnimatedShinyText className='inline-flex items-center justify-center px-2 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400'>
         Searching for results...
@@ -36,7 +36,7 @@ export const ContentDisplay = ({
     );
   }
 
-  if (isLoading && !isSearching && !isGeneratingTimeline) {
+  if (isLoading && !isSearching) {
     return (
       <AnimatedShinyText className='inline-flex items-center justify-center px-2 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400'>
         Building answer...

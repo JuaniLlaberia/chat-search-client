@@ -145,17 +145,19 @@ const InputBar = ({
           </p>
           <div className='flex gap-1'>
             {mode !== 'informative' && (
-              <div className='flex items-center justify-between gap-3 text-sm border rounded-lg border-purple-700 bg-purple-800/20 px-2 mr-2'>
-                <div className='flex items-center gap-2'>
-                  <CalendarRange className='size-4 text-muted-foreground' />
-                  <p>Timeline</p>
+              <div className='flex items-center'>
+                <div className='flex items-center justify-between gap-3 text-sm border rounded-lg border-purple-700 bg-purple-800/20 py-0.5 px-2 mr-2'>
+                  <div className='flex items-center gap-2'>
+                    <CalendarRange className='size-4 text-muted-foreground' />
+                    <p>Timeline</p>
+                  </div>
+                  <button
+                    className='text-muted-foreground p-1   hover:bg-purple-800/30 rounded hover:cursor-pointer'
+                    onClick={() => setMode('informative')}
+                  >
+                    <X className='size-4' />
+                  </button>
                 </div>
-                <button
-                  className='text-muted-foreground p-1 hover:bg-purple-800/30 rounded hover:cursor-pointer'
-                  onClick={() => setMode('informative')}
-                >
-                  <X className='size-4' />
-                </button>
               </div>
             )}
             <Popover>
