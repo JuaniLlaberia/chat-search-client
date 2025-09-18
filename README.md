@@ -1,4 +1,4 @@
-# Web Search Agent Frontend v1.1.0
+# Web Search Agent Frontend v1.2.0
 
 This repository contains the frontend for interacting with the web search agent. It provides a clean, modern and simple chat interface where users can ask questions, view synthesized answers, explore sources, filter searchs and get images.
 
@@ -15,9 +15,17 @@ Goals:
 Back-end service: [Agent server backend](https://github.com/JuaniLlaberia/chat-search-server)
 
 <details>
-  <summary>▶️ Watch Demo</summary>
+  <summary>▶️ Watch Informative Mode Demo</summary>
   
-  https://github.com/user-attachments/assets/b71270cb-307f-4218-a3bc-0117e76ae86e
+  https://github.com/user-attachments/assets/eeeb86cc-686a-48fb-97df-72b095d1540f
+
+
+</details>
+
+<details>
+  <summary>▶️ Watch Timeline Mode Demo</summary>
+  
+  https://github.com/user-attachments/assets/010bdf4d-b286-4ad9-9b9d-6602612d8e74
 
 
 </details>
@@ -32,8 +40,8 @@ Back-end service: [Agent server backend](https://github.com/JuaniLlaberia/chat-s
 * Super simple to use
 * Speech to tech functionalities
 * Modular design → easily extendable
-
-(v1.1.0 -> Improved UI and Front-end features)
+* Timeline and Informative mode
+* Improved responsiveness and UI
 
 ---
 
