@@ -19,14 +19,16 @@ interface ContentDisplayProps {
   content?: string;
   isLoading?: boolean;
   isSearching?: boolean;
+  isGeneratingTimeline?: boolean;
 }
 
 export const ContentDisplay = ({
   content,
   isLoading,
   isSearching,
+  isGeneratingTimeline,
 }: ContentDisplayProps) => {
-  if (isSearching && isLoading) {
+  if ((isSearching && isLoading) || (isSearching && isGeneratingTimeline)) {
     return (
       <AnimatedShinyText className='inline-flex items-center justify-center px-2 py-1 transition ease-out hover:text-neutral-600 hover:duration-300 hover:dark:text-neutral-400'>
         Searching for results...
