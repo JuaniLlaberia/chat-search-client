@@ -34,7 +34,7 @@ export const useChatActions = (options: UseChatActionsOptions = {}) => {
       updateMessage({ followupQuestions: questions });
     },
     onTimelineUpdate: ({ events, isGeneratingTimeline }) => {
-      updateMessage({ events, isGeneratingTimeline });
+      updateMessage({ events, isGeneratingTimeline, isLoading: false });
     },
     onSearchUpdate: searchInfo => {
       updateMessage({ ...searchInfo });

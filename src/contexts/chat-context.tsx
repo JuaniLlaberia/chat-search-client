@@ -53,6 +53,8 @@ export const ChatProvider = ({ children }: ChatProviderProps) => {
         images: [],
         followupQuestions: [],
         events: [],
+        isSearching: mode === 'informative' ? false : true,
+        isGeneratingTimeline: mode === 'informative' ? false : true,
       };
 
       setMessages(prev => [...prev, msg]);
